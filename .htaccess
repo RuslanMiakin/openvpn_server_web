@@ -1,0 +1,49 @@
+# Защита директории с помощью базовой HTTP аутентификации
+AuthType Basic
+AuthName "OpenVPN Admin Panel"
+AuthUserFile /path/to/.htpasswd
+Require valid-user
+
+# Запрет просмотра директорий
+Options -Indexes
+
+# Включение Apache-модуля mod_rewrite для чистых URL
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Перенаправление на HTTPS (раскомментировать для использования)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
+    # Запрет доступа к файлам .php кроме разрешенных
+    RewriteCond %{REQUEST_URI} !(index|login|download)\.php [NC]
+    RewriteRule \.php$ - [F,L]
+    
+    # Запрет прямого доступа к файлу functions.php
+    RewriteRule ^functions\.php$ - [F,L]
+</IfModule>
+
+# Установка PHP конфигураций для безопасности
+<IfModule mod_php7.c>
+    php_flag display_errors off
+    php_flag log_errors on
+    php_value error_log /path/to/error_log
+    php_value max_execution_time 30
+    php_value memory_limit 128M
+    php_flag allow_url_fopen off
+    php_flag allow_url_include off
+</IfModule>
+
+# Установка кэширования и сжатия
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript
+</IfModule> 
