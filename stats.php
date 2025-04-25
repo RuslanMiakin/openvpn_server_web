@@ -2,12 +2,6 @@
 session_start();
 require_once 'functions.php';
 
-// Проверка авторизации
-if (!isset($_SESSION['auth'])) {
-    header('Location: index.php');
-    exit;
-}
-
 // Получение данных о нагрузке на сервер
 function get_server_load() {
     $load = sys_getloadavg();

@@ -17,7 +17,7 @@ function add_client($client_name, $pass_option = '1') {
     }
     
     // Путь к скрипту OpenVPN
-    $script_path = '/path/to/openvpn-install.sh'; // Измените на фактический путь
+    $script_path = '/root/openvpn-install.sh'; // Скрипт находится в папке root
     
     // Формирование команды
     $command = "sudo MENU_OPTION=1 CLIENT=\"{$client_name}\" PASS={$pass_option} {$script_path}";
@@ -41,7 +41,7 @@ function revoke_client($client_index) {
     }
     
     // Путь к скрипту OpenVPN
-    $script_path = '/path/to/openvpn-install.sh'; // Измените на фактический путь
+    $script_path = '/root/openvpn-install.sh'; // Скрипт находится в папке root
     
     // Формирование команды для удаления клиента
     // Note: для автоматического выбора клиента нужно создать временный скрипт

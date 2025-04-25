@@ -1,12 +1,6 @@
 <?php
 session_start();
 
-// Проверка авторизации
-if (!isset($_SESSION['auth'])) {
-    header('Location: index.php');
-    exit;
-}
-
 // Проверка параметра client
 if (!isset($_GET['client']) || empty($_GET['client'])) {
     header('Location: index.php?error=Не указан пользователь');

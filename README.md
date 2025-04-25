@@ -30,62 +30,68 @@
 - `style.css` - Стили для всех страниц
 - `.htaccess` - Настройки безопасности веб-сервера
 
-## Установка
+## Установка на Ubuntu с опенVPN в папке root
 
-1. Установите и настройте OpenVPN с помощью скрипта openvpn-install.sh:
+1. Установите веб-сервер и PHP:
 ```bash
-chmod +x openvpn-install.sh
-sudo ./openvpn-install.sh
-```
-
-2. Установите веб-сервер и PHP:
-```bash
-# Для Debian/Ubuntu
 sudo apt update
-sudo apt install apache2 php php-cli
-
-# Для CentOS/RHEL
-sudo yum install httpd php
-sudo systemctl start httpd
-sudo systemctl enable httpd
+sudo apt install apache2 php php-cli apache2-utils
 ```
 
-3. Скопируйте файлы веб-интерфейса в директорию веб-сервера:
+2. Скопируйте файлы веб-интерфейса в директорию веб-сервера:
 ```bash
-sudo cp -r web/* /var/www/html/
+sudo mkdir -p /var/www/html/openvpn
+sudo cp -r web/* /var/www/html/openvpn/
 ```
 
-4. Настройте пути в файле functions.php:
-```php
-// Путь к скрипту OpenVPN 
-$script_path = '/path/to/openvpn-install.sh';
-```
-
-5. Настройте права доступа:
-```bash
-# Дайте пользователю www-data права на запуск скрипта
-echo "www-data ALL=(ALL) NOPASSWD: /path/to/openvpn-install.sh" | sudo tee -a /etc/sudoers.d/openvpn-web
-chmod 440 /etc/sudoers.d/openvpn-web
-```
-
-6. Настройте защиту директории с помощью .htaccess:
-```bash
-# Создайте файл с паролем
-sudo htpasswd -c /etc/apache2/.htpasswd admin
-
-# Укажите путь в файле .htaccess
-# AuthUserFile /path/to/.htpasswd
-```
-
-7. Убедитесь, что Apache имеет доступ к файлам статуса и сертификатов OpenVPN:
+3. Настройте права доступа:
 ```bash
 # Создайте группу для доступа
 sudo groupadd openvpn-web
+
+# Добавьте пользователя веб-сервера в группу
 sudo usermod -a -G openvpn-web www-data
+
+# Настройте доступ к файлам OpenVPN
 sudo chgrp -R openvpn-web /etc/openvpn/
 sudo chmod -R g+r /etc/openvpn/
+
+# Создайте директорию логов, если она не существует
+sudo mkdir -p /var/log/openvpn/
+sudo touch /var/log/openvpn/status.log
+sudo chgrp openvpn-web /var/log/openvpn/status.log
 sudo chmod g+r /var/log/openvpn/status.log
+
+# Настройте права на выполнение скрипта
+echo "www-data ALL=(ALL) NOPASSWD: /root/openvpn-install.sh" | sudo tee /etc/sudoers.d/openvpn-web
+sudo chmod 440 /etc/sudoers.d/openvpn-web
 ```
+
+4. Настройте защиту директории с помощью .htaccess:
+```bash
+# Создайте файл с паролем
+sudo htpasswd -c /etc/apache2/.htpasswd admin
+```
+
+5. Включите поддержку .htaccess в Apache:
+```bash
+sudo nano /etc/apache2/sites-available/000-default.conf
+```
+Добавьте внутри секции `<VirtualHost *:80>`:
+```
+<Directory /var/www/html/openvpn>
+    AllowOverride All
+</Directory>
+```
+
+6. Включите необходимые модули Apache и перезапустите:
+```bash
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+```
+
+7. Проверьте работоспособность:
+Откройте в браузере http://ваш_сервер/openvpn
 
 ## Безопасность
 
@@ -100,7 +106,12 @@ sudo chmod g+r /var/log/openvpn/status.log
 
 Для использования в продакшене рекомендуется:
 
-1. Настроить HTTPS с помощью Let's Encrypt
+1. Настроить HTTPS с помощью Let's Encrypt:
+```bash
+sudo apt install certbot python3-certbot-apache
+sudo certbot --apache
+```
+
 2. Улучшить обработку ошибок и логирование
 3. Использовать базу данных для хранения логов и статистики
 4. Настроить регулярное резервное копирование

@@ -1,8 +1,8 @@
 # Защита директории с помощью базовой HTTP аутентификации
-AuthType Basic
-AuthName "OpenVPN Admin Panel"
-AuthUserFile /path/to/.htpasswd
-Require valid-user
+# AuthType Basic
+# AuthName "OpenVPN Admin Panel"
+# AuthUserFile /etc/apache2/.htpasswd
+# Require valid-user
 
 # Запрет просмотра директорий
 Options -Indexes
@@ -17,7 +17,7 @@ Options -Indexes
     # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     
     # Запрет доступа к файлам .php кроме разрешенных
-    RewriteCond %{REQUEST_URI} !(index|login|download)\.php [NC]
+    RewriteCond %{REQUEST_URI} !(index|login|download|stats)\.php [NC]
     RewriteRule \.php$ - [F,L]
     
     # Запрет прямого доступа к файлу functions.php
@@ -28,7 +28,7 @@ Options -Indexes
 <IfModule mod_php7.c>
     php_flag display_errors off
     php_flag log_errors on
-    php_value error_log /path/to/error_log
+    php_value error_log /var/log/apache2/openvpn_error_log
     php_value max_execution_time 30
     php_value memory_limit 128M
     php_flag allow_url_fopen off

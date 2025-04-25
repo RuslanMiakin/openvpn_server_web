@@ -2,22 +2,6 @@
 session_start();
 require_once 'functions.php';
 
-// Базовая проверка авторизации (в реальности нужно настроить через .htaccess)
-if (!isset($_SESSION['auth']) && !isset($_POST['password'])) {
-    include 'login.php';
-    exit;
-}
-
-if (isset($_POST['password']) && $_POST['password'] === 'admin') { // В реальности пароль должен храниться безопасно
-    $_SESSION['auth'] = true;
-}
-
-if (!isset($_SESSION['auth'])) {
-    $_SESSION['error'] = 'Неверный пароль';
-    include 'login.php';
-    exit;
-}
-
 // Обработка действий
 if (isset($_POST['action'])) {
     switch ($_POST['action']) {
